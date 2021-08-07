@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    企租租——全球最大的零资产企业服务提供商
+{% endblock %}
+
+{% block body %}
+{#    此处是大屏幕，后期可以做成轮播图#}
+    <div name="slide">
+        <div class="jumbotron">
+            <h1 class="display-3">Welcome Entrepreneur !</h1>
+            <p class="lead">企租租，全球最大的零资产企业服务提供商，致力于为企业减轻负担，让企业家更专注于业务发展本身，而不是在日常琐事上心力憔悴。
+                我们将以专业的服务为企业打理一切非业务型事物，从而让企业经营者可以全身心将精力投入企业的业务经营中。</p>
+            <hr class="my-4">
+            <p>我们的宗旨：为企业减负，让企业经营无后顾之忧，零资产办企业。我们的目标：打造全方位，全天候企业服务公司。</p>
+            <p class="lead">
+                <a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a>
+            </p>
+        </div>
+    </div>
+
+    {#    从这里开始商品展示#}
+    <div class="container">
+        {% for category in categories %}
+            <ul class="list-inline">
+                <li class="list-inline-item"><h3><a href="{{ category.get_absolute_url }}">{{ category.name }}</a></h3>
+                </li>
+                {% for scenario in category.scenarios.all %}
+                    <li class="list-inline-item"><h6><a href="{{ scenario.get_absolute_url }}">{{ scenario.name }}</a>
+                    </h6></li>
+                {% endfor %}
+            </ul>
+            <hr>
+            <div class="d-flex" style="margin-bottom: 50px">
+                {% for scenario in category.scenarios.all %}
+                    {% for product in scenario.products.all %}
+                        <div class="card" style="width: 18rem; margin: 5px 5px">
+                            <img class="card-img-top" src="{{product.image.url}}" alt="{{ product.name}}">
+                            <div class="card-body">
+                                <a href="{{ product.get_absolute_url }}"><h5 class="card-title">{{ product.name|truncatechars:17}}</h5></a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+
+
+{% endblock %}

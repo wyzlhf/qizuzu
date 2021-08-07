@@ -1,0 +1,90 @@
+from yunpian_python_sdk.model import constant as YC
+from yunpian_python_sdk.ypclient import YunpianClient
+# 初始化client,apikey作为所有请求的默认值
+clnt = YunpianClient('80a39fc0393a168337666f7d796b123c')
+param = {YC.MOBILE:'18611429502',YC.TEXT:'【仪秦科技】您的验证码是688188。如非本人操作，请忽略本短信'}
+r = clnt.sms().single_send(param)
+# 获取返回结果, 返回码:r.code(),返回码描述:r.msg(),API结果:r.data(),其他说明:r.detail(),调用异常:r.exception()
+# 短信:clnt.sms() 账户:clnt.user() 签名:clnt.sign() 模版:clnt.tpl() 语音:clnt.voice() 流量:clnt.flow()
+print(r.code())
+
+以上是可用的验证码程序
+
+本次实现购物车、用户验证整套流程，关于支付接口，可以先用自己的微信二维码。
+
+========================================================================================================================
+import requests
+import hashlib
+
+merchantNum = '16307088997613568'
+orderNo = '123456789'
+amount = 66.88
+notifyUrl = 'https://host:8000'
+payType = 'wechat'
+accept_key = '476ba7c9aa334455535026afcd16d4c9'
+sign_str = merchantNum + orderNo + str(amount) + notifyUrl + accept_key
+sign = hashlib.md5(sign_str.encode(encoding='UTF-8')).hexdigest()
+# print(sign)
+query_url = f'http://api-4gkdpbl1b7k.zhifu.fm.it88168.com/api/startOrder?orderNo={orderNo}&amount={amount}&payType={payType}&merchantNum={merchantNum}&sign={sign}&notifyUrl={notifyUrl}'
+print(query_url)
+ret=requests.post(query_url)
+print(ret.json())
+
+以上是https://zf.nnt.ltd/statistical-analysis网站的支付接口调用，应该找到一个二维码可以接通所有支付的聚合接口
+
+
+========================================================================================================================
+
+今天要把登录退出完成，然后整个就差不多了，还差就是账单，金额的传递，账单保留，基本一两天就可以用。然后用户报名，今天最好完成，就是留一个方式就行
+
+
+elif (!company)
+            {
+                layer.msg('请填写您的公司')
+            }else{
+                'tijiao'
+            }
+
+
+========================================================================================================================
+
+Django自带form支持bootstrap的方式，虽然需要写一点jQuery方法，但是省去了自己写post等提交的麻烦。另外还可以使用Django的csrf_token，美滋滋。
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>博客</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+</head>
+<body>
+<div class="container">
+    <form action="{% url 'blog:blog' %}" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ form.title }}
+        </div>
+        <div class="form-group">
+            {{ form.body }}
+        </div>
+        <input type="submit" name="提交">
+    </form>
+</div>
+<script>
+    $(function () {
+        $('#id_title').attr("class", "form-control");
+        $('#id_body').attr("class", "form-control");
+    })
+
+</script>
+</body>
+</html>
+
+
+========================================================================================================================

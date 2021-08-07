@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+    用户地址
+{% endblock %}
+{% block module %}
+    <link rel="stylesheet" href="{% static 'css/address.css' %}">
+{% endblock %}
+
+
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-7"></div>
+            <div class="col-md-5" style="margin: 150px 0">
+                <h3 style="align-items: center">填写收货地址</h3>
+
+
+                {#=============================================开始整个的select选择=============================================#}
+
+                <div class="d-flex align-items-center" style="margin-top: 10px">
+                    <div class="col-md-3">
+                        <label for="country">
+                            选择国家：
+                        </label>
+                    </div>
+                    <div class="col-md-9">
+                        <select style="width: 300px;height: 35px;border: 1px solid blue" id="country"
+                                onchange="get_province(this.value)">
+                            {% for country in countries %}
+                                <option value="{{ country.id }}" id="{{ country.id }}">{{ country.name }}</option>
+                            {% endfor %}
+
+                        </select>
+                    </div>
+                </div>
+
+
+                <div class="d-flex align-items-center" style="margin-top: 10px">
+                    <div class="col-md-3">
+                        <label for="province">
+                            选择省份：
+                        </label>
+                    </div>
+                    <div class="col-md-9">
+                        <select style="width: 300px;height: 35px;border: 1px solid blue" id="province"
+                                disabled="disabled" onchange="get_city(this.value)">
+                            <option value="province-default" id="province-default">选择省/州</option>
+                        </select>
+                    </div>
+                </div>
+
+
+                <div class="d-flex align-items-center" style="margin-top: 10px">
+                    <div class="col-md-3">
+                        <label for="city">
+                            选择城市：
+                        </label>
+                    </div>
+                    <div class="col-md-9">
+                        <select style="width: 300px;height: 35px;border: 1px solid blue" id="city" disabled="disabled"
+                                onchange="get_county(this.value)">
+                            <option value="city-default" id="city-default">选择城市</option>
+                        </select>
+                    </div>
+                </div>
+
+
+                <div class="d-flex align-items-center" style="margin-top: 10px">
+                    <div class="col-md-3">
+                        <label for="county">
+                            选择县区：
+                        </label>
+                    </div>
+                    <div class="col-md-9">
+                        <select style="width: 300px;height: 35px;border:1px solid blue" id="county" disabled="disabled" onchange="address_company()">
+                            <option value="county-default" id="county-default">选择县区</option>
+                        </select>
+                    </div>
+                </div>
+                {# ===================================select选择结束，下面由用户自己填写具体地址和公司===================================#}
+
+
+                <div class="d-flex align-items-center" style="margin-top: 10px">
+                    <div class="col-md-3">
+                        <label for="address">详细地址：</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input type="text" class="form-control" id="address" placeholder="输入您的地址"
+                               style="width: 300px;height: 35px;border:1px solid blue;border-radius: 1px;" disabled="disabled">
+                    </div>
+                </div>
+
+
+                <div class="d-flex align-items-center" style="margin-top: 10px">
+                    <div class="col-md-3">
+                        <label for="company">公司名称：</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input type="text" class="form-control" id="company" placeholder="输入您的公司名称"
+                               style="width: 300px;height: 35px;border:1px solid blue;border-radius: 1px;" disabled="disabled">
+                    </div>
+                </div>
+
+
+                <div class="d-flex justify-content-end" style="margin-top: 10px;margin-right: 20px">
+                    <button class="btn btn-primary" style="width: 100px" onclick="submit()" disabled="disabled" id="submit">提交</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascript %}
+    <script>
+        {#此处页涉及到文本加载顺序和加载是否完毕的问题#}
+
+        function get_province(country) {
+            {#此处取到国家值，需要获取省/州的值，然后将省/州的值填进去，并且解除省/州的禁用，后续函数都一样#}
+            {#console.log(country)#}
+            var layer = layui.layer
+            $.ajax({
+                url: '{% url 'address:province' %}',
+                type: 'POST',
+                data: {'country': country},
+                success: function (data) {
+                    if (data['code'] === '0') {
+                        provinces = data['provinces']
+                        $('#province').attr("disabled", false);
+                        $.each(provinces, function (index, item) {
+                            id = item['id']
+                            name = item['name']
+                            option_str = '<option value="' + id + '" id="' + id + '">' + name + '</option>'
+                            $('#province-default').after(option_str)
+                        })
+
+                    } else {
+                        layer.msg('网络出小差了，稍后再试试吧')
+                    }
+                }
+            })
+        }
+
+        {#获取省/州数值结束，以下开始获取城市数值#}
+
+
+        function get_city(province) {
+            {#此处取到国家值，需要获取省/州的值，然后将省/州的值填进去，并且解除省/州的禁用，后续函数都一样#}
+            var layer = layui.layer
+            $.ajax({
+                url: '{% url 'address:city' %}',
+                type: 'POST',
+                data: {'province': province},
+                success: function (data) {
+                    if (data['code'] === '0') {
+                        cities = data['cities']
+                        $('#city').attr("disabled", false);
+                        $.each(cities, function (index, item) {
+                            id = item['id']
+                            name = item['name']
+                            option_str = '<option value="' + id + '" id="' + id + '">' + name + '</option>'
+                            $('#city-default').after(option_str)
+                        })
+
+                    } else {
+                        layer.msg('网络出小差了，稍后再试试吧')
+                    }
+                }
+            })
+        }
+
+        {#获取城市数值结束，以下开始获取县区数值#}
+
+        function get_county(city) {
+            {#此处取到国家值，需要获取省/州的值，然后将省/州的值填进去，并且解除省/州的禁用，后续函数都一样#}
+            var layer = layui.layer
+            $.ajax({
+                url: '{% url 'address:county' %}',
+                type: 'POST',
+                data: {'city': city},
+                success: function (data) {
+                    if (data['code'] === '0') {
+                        counties = data['counties']
+                        $('#county').attr("disabled", false);
+                        $.each(counties, function (index, item) {
+                            id = item['id']
+                            name = item['name']
+                            option_str = '<option value="' + id + '" id="' + id + '">' + name + '</option>'
+                            $('#county-default').after(option_str)
+                        })
+
+                    } else {
+                        layer.msg('网络出小差了，稍后再试试吧')
+                    }
+                }
+            })
+        }
+        {#获取县区数值结束，以下开始解除公司和地址栏的禁用#}
+
+
+        function address_company() {
+            $('#address').attr("disabled", false);
+            $('#company').attr("disabled", false);
+            $('#submit').attr("disabled", false);
+        }
+
+
+        {#用户数据输入结束，以下开始提交数据，数据先要存入数据库（存入前，先进行比对，是否存在），然后跳转支付链接#}
+
+        function submit() {
+            console.log('调用了submit函数')
+            var layer=layui.layer
+            var country=$('#country').val()
+            var province=$('#province').val()
+            var city=$('#city').val()
+            var county=$('#county').val()
+            var address=$('#address').val()
+            var company=$('#company').val()
+
+            if(!address){
+                layer.msg('请填写您的地址')
+            }else if(!company){
+                layer.msg('请填写您的公司')
+            }else{
+                $.ajax({
+                    url:'{% url 'address:address' %}',
+                    type:'POST',
+                    data:{'country':country,'province':province,'city':city,'county':county,'address':address,'company':company},
+                    success:function (data) {
+                        if(data==='0'){
+                            window.location= {% url 'pay:pay' %};
+                        }else {
+                            layer.msg('网络开小差了，请稍后试试吧')
+                        }
+                    }
+
+                })
+            }
+        }
+
+    </script>
+{% endblock %}

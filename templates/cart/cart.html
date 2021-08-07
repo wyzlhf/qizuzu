@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    我的购物车
+{% endblock %}
+
+
+
+{% block body %}
+    <div class="container" style="margin-top: 20px">
+        <table class="table">
+            <thead class="thead-primary">
+            <tr>
+                <th scope="col">商品名称</th>
+                <th scope="col">商品数量</th>
+                <th scope="col">商品总价</th>
+                <th scope="col">商品押金</th>
+                <th scope="col">使用日期</th>
+                <th scope="col">操作</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            {% for cart in carts %}
+                <tr>
+                    <th>{{ cart.product.name|truncatechars:10 }}</th>
+                    <td>{{ cart.product_amount }}</td>
+                    {#                    <td>{{ cart.product.rent_price_not_null }}*{{ cart.product_amount }}</td>#}
+                    <td>{% widthratio cart.product.rent_price_not_null 1 cart.product_amount %}</td>
+                    <td>{% widthratio cart.product.deposit 1 cart.product_amount %}</td>
+                    <td>{{ cart.start_date }}</td>
+                    <td>
+                        <a href="javascript:" onclick="del_product({{ cart.product_id }})">
+                            <img src="{% static 'images/del.png' %}" alt="DEL" width="20px">
+                            删除
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {#        <div style="text-align:right;margin: 20px 0">#}
+        {#            <div class="row">#}
+        {#                <div>首次需支付金额：</div>#}
+        {#                <div style="color: red">{{ total_value }}</div>#}
+        {#            </div>#}
+        {#        </div>#}
+        {#        <div>#}
+        <div class="d-flex flex-row-reverse" style="text-align:right;margin: 20px 20px">
+            <div class="row">
+                <div class="align-self-center">首次需支付金额：</div>
+                <div style="color: red" class="align-self-center"><h1>{{ total_value }}</h1></div>
+            </div>
+        </div>
+        <div>
+            <a href="{% url 'address:address' %}"><button type="button" class="btn btn-primary btn-lg btn-block">去结算</button></a>
+        </div>
+
+    </div>
+
+{% endblock %}
+
+
+{% block javascript %}
+    <script>
+        {#开始监听事件#}
+        {#开始各种方法，函数#}
+
+        function del_product(product_id) {
+            var layer = layui.layer
+            $.ajax({
+                url: "{% url 'cart:del_product' %}",
+                type: 'POST',
+                data: {'product_id': product_id},
+                success: function (e) {
+                    if (e === '0') {
+                        layer.msg('商品删除成功', {time: 1000}, function () {
+                            window.location.reload();
+                        })
+                    } else {
+                        layer.msg('网络开小差了，稍后再试吧')
+                    }
+                }
+            })
+        }
+    </script>
+
+
+{% endblock %}

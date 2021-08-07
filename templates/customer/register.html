@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+    用户登录
+{% endblock %}
+
+{#{% block module %}#}
+{#    <link rel="stylesheet" href="{% static 'css/customer.css' %}">#}
+{#{% endblock %}#}
+
+{% block body %}
+    <div class="register">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-8 pic_left">
+                </div>
+                <div class="col-md-4" style="margin-top: 150px;margin-bottom: 150px">
+                    <form>
+                        <div class="form-group">
+                            <label for="tel">手机号码</label>
+                            <input type="tel" class="form-control" id="tel" aria-describedby="tel"
+                                   placeholder="输入你的手机号码">
+                            {#                            {{ form.phone }}#}
+                        </div>
+                        <div class="form-group">
+                            <label for="verify-code">验证码</label>
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <input type="text" class="form-control" id="verify-code" placeholder="输入手机验证码">
+                                    {#                                    {{ form.verify_code }}#}
+                                </div>
+                                <div class="col-md-4">
+                                    {#                                    <button class="btn btn-outline-primary" id="verify-code-btn">验证码</button>#}
+                                    <input type="button" value="验证码" id="verify-code-btn"
+                                           class="btn btn-outline-primary">
+                                </div>
+                            </div>
+
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg btn-block" id="register-btn">登录</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    <script>
+        {#此处开始添加事件监控#}
+        $('#verify-code-btn').on('click', get_verify_code)
+        $('#register-btn').on('click', verify_and_register)
+
+        {#此处开始各种函数，方法#}
+
+        function get_verify_code() {
+            var layer = layui.layer
+            var phone = $('#tel').val()
+            $.ajax({
+                url: "{% url 'customer:verify' %}",
+                type: 'POST',
+                data: {'phone': phone},
+                success: function (e) {
+                    if (e === '0') {
+                        layer.msg('您的验证码已发送,30分钟内有效', {time: 7000})
+                    } else {
+                        layer.msg('网络开小差了，稍后试试吧', {time: 7000})
+                    }
+                }
+            })
+        }
+
+        function verify_and_register() {
+            console.log('开始执行verify_and_register函数')
+            var layer = layui.layer;
+            var phone = $('#tel').val();
+            var verify_code = $('#verify-code').val()
+            if (!phone) {
+                confirm('请填写手机号码',{time:9000})
+                return;
+            }else if(!verify_code){
+                confirm('请填写验证码',{time:9000})
+                return;
+            }else{}
+            $.ajax({
+                url:'{% url 'customer:register' %}',
+                type:'POST',
+                data:{'phone':phone,'verify_code':verify_code},
+                success:function (e) {
+                    var status=e['code']
+                    console.log(status)
+                    if(status==='0'){
+                        layer.msg('登录成功',{time:9000})
+                        window.location=e['from_url'];
+                    }else {
+                        layer.msg('验证码错误，请重新登录',{time:9000})
+                    }
+                }
+            })
+        }
+
+
+    </script>
+{% endblock %}

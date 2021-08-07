@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+    {{ product.name }}
+{% endblock %}
+
+
+{% block preload %}
+    <script>
+        {#此处开始日期选择器渲染#}
+        layui.use('laydate', function () {
+            var laydate = layui.laydate;
+            //执行一个laydate实例
+            laydate.render({
+                elem: '#start-date' //指定元素
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block body %}
+    {#    面包屑导航#}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <span class="layui-breadcrumb">
+                <a href="/">首页</a>
+                <a href="{{ product.scenario.category.get_absolute_url }}">{{ product.scenario.category.name }}</a>
+                <a href="{{ product.scenario.get_absolute_url }}">{{ product.scenario.name }}</a>
+            </span>
+        </div>
+    </nav>
+    {#    面包屑导航结束#}
+
+
+    {#    上部分，包括图片和产品基本数据#}
+    <div class="container">
+        <div class="product-top" style="margin-top: 30px">
+            <div class="container">
+                <div class="row">
+                    {#                左边大图#}
+                    <div class="col-md-4">
+                        <div class="product-left">
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" width="350px">
+                        </div>
+                    </div>
+                    {#                右边简单参数#}
+                    <div class="col-md-8">
+                        <div class="product-right">
+                            <h4>{{ product.name }}</h4>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-2">月使用费</div>
+                                <div class="col-md-10 text-left font-weight-bold product-rent-price">
+                                    ${{ product.rent_price_not_null }}</div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-2">服务方式</div>
+                                <div class="col-md-10 text-left font-weight-bold">
+                                    <p>使用期一年，满一年后可以退还，未满一年需要补足款项</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2">起用时间</div>
+                                <div class="col-md-10 text-left font-weight-bold">
+                                    {#                                <div class="layui-inline"> <!-- 注意：这一层元素并不是必须的 -->#}
+                                    <input type="text" class="form-control" id="start-date">
+                                    {#                                </div>#}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2">数量</div>
+                                <div class="col-md-10 text-left font-weight-bold">
+                                    <input class="form-control" type="text" placeholder="请输入需要租用的产品数量"
+                                           id="product-amount">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2">单件押金</div>
+                                <div class="col-md-10 text-left font-weight-bold product-rent-price">
+                                    ${{ product.deposit }}</div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6 total-price">
+                                    <div class="row">
+                                        <div class="col-md-6">合计使用费</div>
+                                        <div class="col-md-6" id="total-price">合计首期使用费</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 total-deposit">
+                                    <div class="row">
+                                        <div class="col-md-6">合计押金</div>
+                                        <div class="col-md-6" id="total-price">合计首期使用费</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <button type="button" class="btn btn-outline-primary btn-lg btn-block" id="add-cart">
+                                        加入购物车
+                                    </button>
+                                </div>
+                                {#                                <div class="col-md-12">#}
+                                {#                                    <button type="button" class="btn btn-primary btn-lg btn-block" id="purchase">立即下单#}
+                                {#                                    </button>#}
+                                {#                                </div>#}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        {#    开始下部分，主要是精品推荐和产品详细参数#}
+        <div class="product-down">
+            下边
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascript %}
+    <script>
+        {#此处开始添加监控事件#}
+        $('#add-cart').on('click',add_cart)
+        {#此处开始各种函数，方法#}
+        function add_cart() {
+            var layer=layui.layer;
+            var product_amount=$('#product-amount').val()
+            var start_date=$('#start-date').val()
+            {#layer.msg('加购开始')#}
+            $.ajax({
+                url:'{% url 'cart:add_cart' %}',
+                type:'POST',
+                data:{'product_amount':product_amount,'start_date':start_date,'product_id':{{ product.id }},},
+                success:function (e) {
+                    if(e==='0'){
+                        layer.msg('商品已加入购物车')
+                        window.location.reload("#global-header");
+                    }else if(e==='1') {
+                        layer.msg('网络出小差了，稍后试试吧')
+                    }else {
+                        window.location='{% url 'customer:register' %}'
+                    }
+                }
+            })
+        }
+    </script>
+{% endblock %}
